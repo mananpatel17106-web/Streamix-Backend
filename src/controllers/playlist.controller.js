@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId, trusted } from "mongoose";
+import mongoose, { isValidObjectId} from "mongoose";
 import { Playlist } from "../models/playlist.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -33,7 +33,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     owner: userId,
   });
 
-  if ((!playlist, length)) {
+  if (!playlist.length){
     throw new ApiError(404, "Playlist not found");
   }
   return res
