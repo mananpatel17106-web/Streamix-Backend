@@ -183,7 +183,7 @@ const updateVideo = asyncHandler(async (req, res) => {
       $set: {
         title,
         description,
-        thumbnail: thumbnail.url,
+        thumbnail: thumbnail.secure_url,
       },
     },
     {
@@ -227,7 +227,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
   const video = await Video.findById(videoId);
   if (!video) {
-    throw new ApiError(404, "Video npot found");
+    throw new ApiError(404, "Video not found");
   }
 
   video.isPublished = !video.isPublished;
