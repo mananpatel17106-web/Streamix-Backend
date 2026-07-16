@@ -11,6 +11,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   if (!isValidObjectId(channelId)) {
     throw new ApiError(400, "Invalid Channel Id");
   }
+
   if (channelId === req.user._id.toString()) {
     throw new ApiError(400, "You cannot subscribe to your own channel");
   }
@@ -19,23 +20,34 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     subscriber: req.user._id,
     channel: channelId,
   });
+
+  let subscribed = false;
+
   if (existedSubscription) {
     await existedSubscription.deleteOne();
+  } else {
+    await Subscription.create({
+      subscriber: req.user._id,
+      channel: channelId,
+    });
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, {}, "Channel unsubscribed successfully"));
+    subscribed = true;
   }
 
-  const subscription = await Subscription.create({
-    subscriber: req.user._id,
+  const subscribersCount = await Subscription.countDocuments({
     channel: channelId,
   });
-  return res
-    .status(201)
-    .json(
-      new ApiResponse(201, subscription, "Channel subscribed successfully")
-    );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        subscribed,
+        subscribersCount,
+      },
+      subscribed ? "Subscribed successfully" : "Unsubscribed successfully"
+    )
+  );
 });
 
 // controller to return subscriber list of a channel
