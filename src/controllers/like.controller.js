@@ -3,6 +3,8 @@ import { Like } from "../models/like.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Video } from "../models/video.model.js";
+import { createNotification } from "../services/notification.service.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
@@ -26,6 +28,18 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
       likedBy: req.user._id,
     });
 
+    const video = await Video.findById(videoId).select("owner title");
+
+    if (video) {
+      await createNotification({
+        receiver: video.owner,
+        sender: req.user._id,
+        type: "like",
+        message: "liked your video.",
+        video: video._id,
+      });
+    }
+
     liked = true;
   }
 
@@ -40,9 +54,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         liked,
         likesCount,
       },
-      liked
-        ? "Video liked successfully"
-        : "Video unliked successfully"
+      liked ? "Video liked successfully" : "Video unliked successfully"
     )
   );
 });
