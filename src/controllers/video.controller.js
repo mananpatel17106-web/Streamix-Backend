@@ -9,8 +9,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const getAllVideos = asyncHandler(async (req, res) => {
   const {
     page = 1,
-    limit = 10,
-    query,
+    limit = 12,
+    query = "",
     sortBy = "createdAt",
     sortType = "desc",
     userId,
@@ -24,31 +24,15 @@ const getAllVideos = asyncHandler(async (req, res) => {
     isPublished: true,
   };
 
-  if (query) {
-    match.$or = [
-      {
-        title: {
-          $regex: query,
-          $options: "i",
-        },
-      },
-      {
-        description: {
-          $regex: query,
-          $options: "i",
-        },
-      },
-    ];
-  }
-
   if (userId) {
     match.owner = new mongoose.Types.ObjectId(userId);
   }
 
-  const aggregate = Video.aggregate([
+  const pipeline = [
     {
       $match: match,
     },
+
     {
       $lookup: {
         from: "users",
@@ -66,6 +50,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         ],
       },
     },
+
     {
       $addFields: {
         owner: {
@@ -73,23 +58,99 @@ const getAllVideos = asyncHandler(async (req, res) => {
         },
       },
     },
-    {
-      $sort: {
-        [sortBy]: sortType === "asc" ? 1 : -1,
+  ];
+
+  if (query.trim()) {
+  const search = query
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+  pipeline.push({
+    $match: {
+      $expr: {
+        $or: [
+          {
+            $regexMatch: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $toLower: "$title",
+                  },
+                  find: " ",
+                  replacement: "",
+                },
+              },
+              regex: search,
+            },
+          },
+
+          {
+            $regexMatch: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $toLower: "$description",
+                  },
+                  find: " ",
+                  replacement: "",
+                },
+              },
+              regex: search,
+            },
+          },
+
+          {
+            $regexMatch: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $toLower: "$owner.fullName",
+                  },
+                  find: " ",
+                  replacement: "",
+                },
+              },
+              regex: search,
+            },
+          },
+
+          {
+            $regexMatch: {
+              input: {
+                $replaceAll: {
+                  input: {
+                    $toLower: "$owner.username",
+                  },
+                  find: " ",
+                  replacement: "",
+                },
+              },
+              regex: search,
+            },
+          },
+        ],
       },
     },
-  ]);
+  });
+}
 
-  const options = {
-    page: parseInt(page),
-    limit: parseInt(limit),
-  };
+  pipeline.push({
+    $sort: {
+      [sortBy]: sortType === "asc" ? 1 : -1,
+    },
+  });
 
-  const videos = await Video.aggregatePaginate(aggregate, options);
+  const aggregate = Video.aggregate(pipeline);
+
+  const videos = await Video.aggregatePaginate(aggregate, {
+    page: Number(page),
+    limit: Number(limit),
+  });
 
   return res
     .status(200)
-    .json(new ApiResponse(200, videos, "Videos fetched Successfully"));
+    .json(new ApiResponse(200, videos, "Videos fetched successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -110,7 +171,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
   }
 
   const video = await uploadOnCloudinary(videoLocalPath);
-  
+
   if (!video) {
     throw new ApiError(500, "Failed to upload video");
   }
@@ -174,10 +235,7 @@ const getVideoById = asyncHandler(async (req, res) => {
               },
 
               isSubscribed: {
-                $in: [
-                  req.user?._id,
-                  "$subscribers.subscriber",
-                ],
+                $in: [req.user?._id, "$subscribers.subscriber"],
               },
             },
           },
@@ -216,14 +274,11 @@ const getVideoById = asyncHandler(async (req, res) => {
         },
 
         isLiked: {
-          $in: [
-            req.user?._id,
-            "$likes.likedBy",
-          ],
+          $in: [req.user?._id, "$likes.likedBy"],
         },
       },
     },
-        {
+    {
       $project: {
         videoFile: 1,
         thumbnail: 1,
@@ -258,13 +313,9 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   video[0].views += 1;
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      video[0],
-      "Video fetched successfully"
-    )
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video[0], "Video fetched successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
