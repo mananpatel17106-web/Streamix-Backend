@@ -101,9 +101,20 @@ const deleteNotification = asyncHandler(async (req, res) => {
   );
 });
 
+const clearNotifications = asyncHandler(async (req, res) => {
+  await Notification.deleteMany({
+    receiver: req.user._id,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Notifications cleared successfully")
+  );
+});
+
 export {
   getNotifications,
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  clearNotifications
 };
