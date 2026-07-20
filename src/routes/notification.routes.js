@@ -5,7 +5,7 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  clearNotifications
+  clearNotifications,
 } from "../controllers/notification.controller.js";
 
 const router = Router();
@@ -16,9 +16,10 @@ router.route("/").get(getNotifications);
 
 router.route("/read-all").patch(markAllAsRead);
 
+router.route("/clear").delete(clearNotifications); // 👈 Aa pela
+
 router.route("/:notificationId/read").patch(markAsRead);
 
 router.route("/:notificationId").delete(deleteNotification);
-router.route("/clear").delete(clearNotifications);
 
 export default router;
