@@ -61,79 +61,76 @@ const getAllVideos = asyncHandler(async (req, res) => {
   ];
 
   if (query.trim()) {
-  const search = query
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
+    const search = query.trim().toLowerCase().replace(/\s+/g, "");
 
-  pipeline.push({
-    $match: {
-      $expr: {
-        $or: [
-          {
-            $regexMatch: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $toLower: "$title",
+    pipeline.push({
+      $match: {
+        $expr: {
+          $or: [
+            {
+              $regexMatch: {
+                input: {
+                  $replaceAll: {
+                    input: {
+                      $toLower: "$title",
+                    },
+                    find: " ",
+                    replacement: "",
                   },
-                  find: " ",
-                  replacement: "",
                 },
+                regex: search,
               },
-              regex: search,
             },
-          },
 
-          {
-            $regexMatch: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $toLower: "$description",
+            {
+              $regexMatch: {
+                input: {
+                  $replaceAll: {
+                    input: {
+                      $toLower: "$description",
+                    },
+                    find: " ",
+                    replacement: "",
                   },
-                  find: " ",
-                  replacement: "",
                 },
+                regex: search,
               },
-              regex: search,
             },
-          },
 
-          {
-            $regexMatch: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $toLower: "$owner.fullName",
+            {
+              $regexMatch: {
+                input: {
+                  $replaceAll: {
+                    input: {
+                      $toLower: "$owner.fullName",
+                    },
+                    find: " ",
+                    replacement: "",
                   },
-                  find: " ",
-                  replacement: "",
                 },
+                regex: search,
               },
-              regex: search,
             },
-          },
 
-          {
-            $regexMatch: {
-              input: {
-                $replaceAll: {
-                  input: {
-                    $toLower: "$owner.username",
+            {
+              $regexMatch: {
+                input: {
+                  $replaceAll: {
+                    input: {
+                      $toLower: "$owner.username",
+                    },
+                    find: " ",
+                    replacement: "",
                   },
-                  find: " ",
-                  replacement: "",
                 },
+                regex: search,
               },
-              regex: search,
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  });
-}
+    });
+  }
 
   pipeline.push({
     $sort: {
@@ -154,7 +151,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, isPublished = "true" } = req.body;
 
   if ([title, description].some((field) => !field || field.trim() === "")) {
     throw new ApiError(400, "Title and Description are required");
@@ -188,6 +185,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     description,
     duration: video.duration,
     owner: req.user._id,
+    isPublished: isPublished === "true",
   });
   if (!createdVideo) {
     throw new ApiError(500, "Failed to publish video");
