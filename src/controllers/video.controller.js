@@ -14,6 +14,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     sortBy = "createdAt",
     sortType = "desc",
     userId,
+    category,
   } = req.query;
 
   if (userId && !isValidObjectId(userId)) {
@@ -23,6 +24,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
   const match = {
     isPublished: true,
   };
+
+  if (category && category.trim() && category !== "All") {
+    match.category = category.trim();
+  }
 
   if (userId) {
     match.owner = new mongoose.Types.ObjectId(userId);
@@ -151,7 +156,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description, isPublished = "true" } = req.body;
+  const { title, description, category, isPublished = "true" } = req.body;
 
   if ([title, description].some((field) => !field || field.trim() === "")) {
     throw new ApiError(400, "Title and Description are required");
@@ -183,6 +188,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: thumbnail.secure_url,
     title,
     description,
+    category,
     duration: video.duration,
     owner: req.user._id,
     isPublished: isPublished === "true",
