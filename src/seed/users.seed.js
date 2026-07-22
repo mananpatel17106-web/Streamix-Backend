@@ -97,7 +97,11 @@ export const seedUsers = async () => {
   try {
     console.log("🌱 Seeding Users...");
 
-    await User.deleteMany();
+    const count = await User.countDocuments();
+
+    if (count === 0) {
+      await User.insertMany(users);
+    }
 
     const createdUsers = await User.insertMany(users);
 
