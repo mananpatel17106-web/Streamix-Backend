@@ -7,6 +7,7 @@ import seedLikes from "./likes.seed.js";
 import seedComments from "./comments.seed.js";
 import seedSubscriptions from "./subscriptions.seed.js";
 import seedPlaylists from "./playlists.seed.js";
+import seedWatchHistory from "./watchHistory.seed.js";
 
 import dns from "dns";
 
@@ -26,6 +27,7 @@ const startSeeding = async () => {
     await seedComments();
     await seedSubscriptions();
     await seedPlaylists();
+    await seedWatchHistory();
 
     console.log("🎉 Database seeding completed.");
 
