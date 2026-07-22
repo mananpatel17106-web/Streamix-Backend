@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 
 const users = [
@@ -10,7 +9,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=1",
     coverImage: "https://picsum.photos/1200/300?random=1",
   },
-
   {
     fullName: "Emily Johnson",
     username: "emilyjohnson",
@@ -19,7 +17,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=2",
     coverImage: "https://picsum.photos/1200/300?random=2",
   },
-
   {
     fullName: "Michael Brown",
     username: "michaelbrown",
@@ -28,7 +25,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=3",
     coverImage: "https://picsum.photos/1200/300?random=3",
   },
-
   {
     fullName: "Sophia Wilson",
     username: "sophiawilson",
@@ -37,7 +33,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=4",
     coverImage: "https://picsum.photos/1200/300?random=4",
   },
-
   {
     fullName: "Daniel Miller",
     username: "danielmiller",
@@ -46,7 +41,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=5",
     coverImage: "https://picsum.photos/1200/300?random=5",
   },
-
   {
     fullName: "Olivia Davis",
     username: "oliviadavis",
@@ -55,7 +49,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=6",
     coverImage: "https://picsum.photos/1200/300?random=6",
   },
-
   {
     fullName: "James Anderson",
     username: "jamesanderson",
@@ -64,7 +57,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=7",
     coverImage: "https://picsum.photos/1200/300?random=7",
   },
-
   {
     fullName: "Ava Thomas",
     username: "avathomas",
@@ -73,7 +65,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=8",
     coverImage: "https://picsum.photos/1200/300?random=8",
   },
-
   {
     fullName: "William Moore",
     username: "williammoore",
@@ -82,7 +73,6 @@ const users = [
     avatar: "https://i.pravatar.cc/300?img=9",
     coverImage: "https://picsum.photos/1200/300?random=9",
   },
-
   {
     fullName: "Isabella Taylor",
     username: "isabellataylor",
@@ -99,11 +89,19 @@ export const seedUsers = async () => {
 
     const count = await User.countDocuments();
 
-    if (count === 0) {
-      await User.insertMany(users);
+    if (count > 0) {
+      console.log("✅ Users already exist. Skipping...");
+      return await User.find();
     }
 
-    const createdUsers = await User.insertMany(users);
+    const createdUsers = [];
+
+    for (const user of users) {
+      // User.create() triggers pre("save") hook,
+      // so password gets hashed automatically.
+      const createdUser = await User.create(user);
+      createdUsers.push(createdUser);
+    }
 
     console.log(`✅ ${createdUsers.length} users seeded successfully.`);
 
