@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import connectDB from "../db/index.js";
 import seedUsers from "./users.seed.js";
 import seedVideos from "./videos.seed.js";
+import seedLikes from "./likes.seed.js";
+import seedComments from "./comments.seed.js";
 import dns from "dns";
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
@@ -16,7 +18,9 @@ const startSeeding = async () => {
 
     await seedUsers();
     await seedVideos();
-
+    await seedLikes();
+    await seedComments();
+    
     console.log("🎉 Database seeding completed.");
 
     process.exit(0);
