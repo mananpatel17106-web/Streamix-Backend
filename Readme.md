@@ -183,7 +183,7 @@ CLOUDINARY_API_SECRET=
 Clone the repository
 
 ```bash
-git clone https://github.com/mananpatel17106-web/Streamix-Backend
+git clone https://github.com/mananpatel17106-web/Streamix-Backend.git
 ```
 
 Go inside project
