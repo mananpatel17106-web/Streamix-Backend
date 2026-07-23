@@ -24,6 +24,16 @@ This backend can be integrated with any frontend built using React, Next.js, Vue
 
 ---
 
+Live API
+
+https://streamix-backend-y8ib.onrender.com
+
+Health Check
+
+https://streamix-backend-y8ib.onrender.com/api/v1/healthcheck
+
+---
+
 # ✨ Features
 
 ## 🔐 Authentication
@@ -163,7 +173,7 @@ PORT=8000
 
 MONGODB_URI=
 
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=https://your-frontend.vercel.app
 
 ACCESS_TOKEN_SECRET=
 ACCESS_TOKEN_EXPIRY=1d
@@ -201,7 +211,7 @@ npm install
 Create environment file
 
 ```bash
-cp .env.example .env
+cp .env.sample .env
 ```
 
 Start Development Server
